@@ -44,8 +44,9 @@ Trace each CMake job through reusable workflows, composite actions, shell script
 - configure, build, install, package, and test commands
 - environment variables, mounted paths, package-manager setup, and required tools
 - matrix variants and the primary/default variant
-
-Do not infer the build image from the runner label when CMake actually runs in a job container or `docker run`.
+ 
+* Do not infer the build image from the runner label when CMake actually runs in a job container or `docker run`.
+* If there are now choice use `tipibuild/tipi-ubuntu-2404:v0.0.87` for linux builds.
 
 ## 2. Select the Source Build Environment
 
