@@ -122,6 +122,16 @@ Then express only toolchain facts proven by the existing CI:
 - Do not set project policy, test options, dependency versions, or install prefixes in a toolchain file.
 - Do not reference Polly helper files unless the repository already contains them. A standalone toolchain must remain standalone.
 
+
+### cmake-re proper environment variables
+Always export on the environment the following, before running anything with cmake-re.
+
+```sh
+export TIPI_DISABLE_AR_RANLIB_DRIVER="ON"
+export TIPI_CACHE_CONSUME_ONLY="ON"
+export TIPI_CACHE_FORCE_ENABLE="OFF"
+```
+
 ## 4. Add the GitHub Workflow
 
 Create `.github/workflows/cmake-re.yml`. Preserve the repository's existing workflow trigger conventions and permissions. Default to pull requests, pushes to the default branch, and manual dispatch when no convention exists.
@@ -163,7 +173,25 @@ Run all checks possible in the current environment:
 - configure with `cmake-re`
 - build and run tests
 
-If Docker or `cmake-re` is unavailable, still validate syntax and clearly report which runtime checks remain for CI.
+If run from within a Docker and docker-in-docker is unavailable: make a --host build.
+
+When `cmake-re` is unavailable, propose installation, if docker is available, run the commands and a `cmake-re --host` build using the following command, possibly replacing `tipibuild/tipi-ubuntu-2404:v0.0.87` with the dedicated container you built:
+```sh
+$PROJECT_NAME=`basename $PWD`
+mkdir -p ../$PROJECT_NAME-tipi-workdir-vT.w
+mkdir -p ../generalized-toolchains
+docker run --init --detach --name $PROJECT_NAME-tipi  -u`id -u`:`id -g` --group-add tipi -e TIPI_CACHE_CONSUME_ONLY=ON -e TIPI_CACHE_FORCE_ENABLE=OFF -e HOME -v $HOME:$HOME:rw \
+  --mount type=bind,source=$PWD/../$PROJECT_NAME-tipi-workdir-vT.w,target=/usr/local/share/.tipi/vT.w/ \
+  --mount type=bind,source=$PWD/../generalized-toolchains,target=/usr/local/share/.tipi/environments/generalized/v1/ \
+  -v $PWD:$PWD:rw -w $PWD \
+  tipibuild/tipi-ubuntu-2404:v0.0.87 \
+  sleep infinity
+
+docker exec -u 0 $PROJECT_NAME-tipi useradd -d $HOME -u `id -u` $PROJECT_NAME
+
+# This launches a container interactive shell into a cmake-re enabled docker
+docker exec -it $PROJECT_NAME-tipi tipi run /bin/bash
+```
 
 Compare the new path with existing CI:
 
