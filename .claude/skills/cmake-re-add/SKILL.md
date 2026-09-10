@@ -173,6 +173,7 @@ Run all checks possible in the current environment:
 - configure with `cmake-re`
 - build and run tests
 
+### Without Docker available
 If run from within a Docker and docker-in-docker is unavailable: make a --host build.
 
 When `cmake-re` is unavailable, propose installation, if docker is available, run the commands and a `cmake-re --host` build using the following command, possibly replacing `tipibuild/tipi-ubuntu-2404:v0.0.87` with the dedicated container you built:
@@ -191,6 +192,19 @@ docker exec -u 0 $PROJECT_NAME-tipi useradd -d $HOME -u `id -u` $PROJECT_NAME
 
 # This launches a container interactive shell into a cmake-re enabled docker
 docker exec -it $PROJECT_NAME-tipi tipi run /bin/bash
+```
+
+Support `--host --distributed` types of builds by hardcoding the sha256 hash manifest in the pkr.js, as it won't require docker for a `--host --distributed` build. So this also works to run a distributed build within the above container.
+
+What would need docker is resolving the environment image: cmake-re has to tell the workers
+which image to run in, and turning a tag into a manifest digest is what it shells out for.
+environments/ubuntu-clang.pkr.js pins the digest instead, so that step disappears. Re-pin it
+when the image moves:
+
+```sh
+curl -fsSI -H "Authorization: Bearer $TOKEN" \
+    -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+    https://registry-1.docker.io/v2/tipibuild/tipi-ubuntu-2404/manifests/<tag`
 ```
 
 Compare the new path with existing CI:
