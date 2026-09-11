@@ -139,15 +139,18 @@ Create `.github/workflows/cmake-re.yml`. Preserve the repository's existing work
 The workflow must:
 
 1. Check out the repository, including submodules and LFS only if existing CI needs them.
-2. Install `cmake-re` using the official installer:
-
-   ```bash
-   /bin/bash -c \
-     "$(curl -fsSL https://raw.githubusercontent.com/tipi-build/cli/master/install/install_for_macos_linux.sh)"
-   ```
+2. Make sure cmake-re is available
+  - For linux build runs them inside docker image `tipibuild/tipi-ubuntu-2404:latest`
+  - For macOS build install `cmake-re` using the official installer: `/bin/bash -c \ "$(curl -fsSL https://raw.githubusercontent.com/tipi-build/cli/master/install/install_for_macos_linux.sh)"`
+  - For windows build install with powershell using the official installer:
+    ```
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls, [Net.SecurityProtocolType]::Tls11, [Net.SecurityProtocolType]::Tls12, [Net.SecurityProtocolType]::Ssl3
+    [Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"
+    . { iwr -useb https://raw.githubusercontent.com/tipi-build/cli/master/install/install_for_windows.ps1 } | iex
+    ```
 
 3. Verify Docker is available and is version 27.2.0 or newer.
-4. Run the equivalent of the existing configure/build flow with:
+4. Run the equivalent of the existing configure/build flow with (if run within docker append `--host` to the command):
 
    ```bash
    cmake-re -S . -B build/cmake-re \
