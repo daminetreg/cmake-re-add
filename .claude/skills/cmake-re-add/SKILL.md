@@ -165,6 +165,19 @@ Do not add unverified flags. Run `cmake-re --help` or consult current documentat
 
 Use least-privilege workflow permissions. Do not expose secrets to forked pull requests.
 
+Add a github action cached folder of cmake-re mirror in the github workflow for the cmake-re- jobs cache /usr/local/share/.tipi/v*.w/ like:
+```yaml
+      # cmake-re's mirror and build trees;
+      # content; an older entry is still a warm start, cmake-re rebuilds what differs.
+      - name: Restore the build cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/share/.tipi/v*.w/
+          key: tipi-work-linux-container-${{ hashFiles('CMakeLists.txt', 'environments/**') }}
+          restore-keys: |
+            tipi-work-linux-container-
+```
+
 ## 5. Validate
 
 Run all checks possible in the current environment:
